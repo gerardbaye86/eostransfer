@@ -148,15 +148,15 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     }
   };
 
-  const handleSendChatMessage = useCallback(async (messageText: string) => {
+const handleSendChatMessage = useCallback(async (messageText: string) => {
     const timestamp = new Date();
     const userMessage: ChatMessage = {
-      id: Date.now(),
-      sender: 'user',
-      text: messageText.trim(),
-      timestamp: timestamp,
+        id: Date.now(),
+        sender: 'user',
+        text: messageText.trim(),
+        timestamp: timestamp,
     };
-    
+
     const botResponsePlaceholder: ChatMessage = {
         id: Date.now() + 1,
         sender: 'bot',
@@ -167,7 +167,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
 
     setMessages(prev => [...prev, userMessage, botResponsePlaceholder]);
     setIsSendingChat(true);
-    
+
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -187,27 +187,58 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let buffer = '';
         let accumulatedText = '';
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            accumulatedText += decoder.decode(value, { stream: true });
+            buffer += decoder.decode(value, { stream: true });
+
+            // Process buffer line-by-line in case multiple JSON objects are received
+            const lines = buffer.split(/\r?\n/);
+
+            // Keep the last (potentially incomplete) line in the buffer
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                if (line.trim() === '') continue;
+                try {
+                    // The stream sends multiple JSON objects, sometimes concatenated.
+                    // We need to handle this by finding the boundaries.
+                    const jsonObjects = line.replace(/}{/g, '}\n{').split('\n');
+                    for(const jsonObjStr of jsonObjects) {
+                        if (jsonObjStr.trim() === '') continue;
+                        const parsed = JSON.parse(jsonObjStr);
+                        if (parsed.type === 'item' && parsed.content) {
+                            accumulatedText += parsed.content;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse JSON object from stream:', line, e);
+                    // Sometimes, a non-JSON string might be a valid text chunk by itself
+                    if (!line.includes('"type"')) {
+                       accumulatedText += line;
+                    }
+                }
+            }
             
-            setMessages(prev => 
-                prev.map(msg => 
+            // Update the UI with the accumulated text so far
+            setMessages(prev =>
+                prev.map(msg =>
                     msg.id === botResponsePlaceholder.id
-                        ? { ...msg, text: accumulatedText, timestamp: new Date() }
+                        ? { ...msg, text: accumulatedText, isLoading: true, timestamp: new Date() }
                         : msg
                 )
             );
         }
         
-        setMessages(prev => 
-            prev.map(msg => 
+        // Final update to remove loading indicator
+        setMessages(prev =>
+            prev.map(msg =>
                 msg.id === botResponsePlaceholder.id
-                    ? { ...msg, isLoading: false }
+                    ? { ...msg, text: accumulatedText, isLoading: false }
                     : msg
             )
         );
@@ -219,6 +250,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
             sender: 'bot',
             text: "Hi ha hagut un error en connectar amb el servidor. Si us plau, torna a intentar-ho més tard.",
             timestamp: new Date(),
+            isLoading: false,
         };
         setMessages(prev => prev.map(msg => msg.id === botResponsePlaceholder.id ? errorMessage : msg));
     } finally {
