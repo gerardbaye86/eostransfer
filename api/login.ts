@@ -1,13 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Disable Vercel's default body parser to ensure we can read the stream manually.
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-// Helper function to read the raw request stream into a buffer.
 async function buffer(readable: VercelRequest): Promise<Buffer> {
   const chunks = [];
   for await (const chunk of readable) {
@@ -16,9 +14,18 @@ async function buffer(readable: VercelRequest): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-const USERS: Record<string, { id: string; name: string }> = {
-  [process.env.PIN_1 as string]: { id: 'user1', name: 'Gerard - EOS' },
-  [process.env.PIN_2 as string]: { id: 'user2', name: 'Jordi - EOS' },
+// Store user data indexed by email for secure lookup.
+const USERS: Record<string, { id: string; name: string; pin: string }> = {
+  'gerard@eosconsult.eu': {
+    id: 'user1',
+    name: 'Gerard',
+    pin: process.env.PIN_1 as string,
+  },
+  'jordi@eosconsult.eu': {
+    id: 'user2',
+    name: 'Jordi',
+    pin: process.env.PIN_2 as string,
+  },
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -28,30 +35,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Manually buffer and parse the request body.
-    // This is a robust method that avoids any issues with automatic body parsers.
     const bodyBuffer = await buffer(req);
     const bodyString = bodyBuffer.toString();
 
     if (!bodyString) {
-        return res.status(400).json({ error: 'Request body is empty.' });
+      return res.status(400).json({ error: 'Request body is empty.' });
     }
 
-    const { pin } = JSON.parse(bodyString);
+    const { email, pin } = JSON.parse(bodyString);
 
-    if (typeof pin !== 'string') {
-      return res.status(400).json({ error: 'Invalid PIN format in request body.' });
+    if (typeof email !== 'string' || typeof pin !== 'string') {
+      return res.status(400).json({ error: 'Invalid email or PIN format.' });
     }
 
-    const foundUser = USERS[pin];
+    // Find the user entry by email (case-insensitive).
+    const userEntry = USERS[email.toLowerCase()];
 
-    if (foundUser) {
-      res.status(200).json({ success: true, user: foundUser });
+    // Check if the user exists and the PIN matches.
+    if (userEntry && userEntry.pin === pin) {
+      // Exclude the PIN from the user object sent to the client.
+      const { pin: _, ...user } = userEntry;
+      res.status(200).json({ success: true, user });
     } else {
-      res.status(401).json({ success: false, error: 'Invalid PIN' });
+      res.status(401).json({ success: false, error: 'Invalid email or PIN' });
     }
   } catch (error: any) {
-    // This will catch errors from JSON.parse if the body is not valid JSON.
     console.error('Error in login handler:', error);
     res.status(400).json({ error: 'Bad Request', details: error.message });
   }
