@@ -2,58 +2,59 @@
 <html lang="ca">
   <head>
     <meta charset="UTF-8" />
+    <base href="/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EOSTransfer</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              display: ['Orbitron', 'sans-serif'],
-            },
-          },
-        },
+        theme: { extend: { fontFamily: { display: ['Orbitron','sans-serif'] } } }
       }
     </script>
-    <link rel="manifest" href="/manifest.json" />
+
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#111827" />
 
-    <!-- 💠 Iconos -->
-  <link rel="icon" type="image/png" href="/icon.png" />
-  <link rel="apple-touch-icon" href="/icon.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="EOSTransfer" />
-  
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "heic2any": "https://aistudiocdn.com/heic2any@^0.0.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    <!-- iOS PWA -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="EOSTransfer" />
+
+    <script type="importmap">
+    {
+      "imports": {
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "heic2any": "https://aistudiocdn.com/heic2any@^0.0.4"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="/index.css">
+  </head>
   <body class="bg-gray-950 text-gray-200 font-sans">
     <div class="absolute top-0 left-0 w-full h-full bg-cover bg-center" style="background-image: radial-gradient(circle at center, rgba(31, 41, 55, 0.5) 0%, rgba(17, 24, 39, 0) 60%);"></div>
     <div id="root" class="relative z-10"></div>
+
     <script type="module" src="/index.tsx"></script>
+
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => {
+              console.log('SW registered', reg);
+            })
+            .catch(err => console.error('SW registration failed', err));
         });
       }
     </script>
