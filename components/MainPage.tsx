@@ -57,7 +57,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
             });
             } catch (error) {
             console.error(`Error converting ${file.name}:`, error);
-            setUploadError(`No s'ha pogut convertir l'arxiu HEIC: ${file.name}.`);
+            setUploadError(`No s\'ha pogut convertir l\'arxiu HEIC: ${file.name}.`);
             return null;
             }
         }
@@ -93,7 +93,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     const isNameTaken = files.some(f => f.name === newName && f !== originalFile);
 
     if (isNameTaken) {
-      alert(`El nom d'arxiu "${newName}" ja existeix. Si us plau, tria'n un altre.`);
+      alert(`El nom d\'arxiu "${newName}" ja existeix. Si us plau, tria\'n un altre.`);
       return;
     }
 
@@ -117,7 +117,6 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     setUploadError(null);
     setUploadSuccess(false);
 
-    const webhookUrl = 'https://n8n-n8n.v8iccl.easypanel.host/webhook/757dca10-8d0b-4f09-a66a-45af24a8cb50';
     const formData = new FormData();
 
     formData.append('userId', user.id);
@@ -126,19 +125,24 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     });
 
     try {
-      await fetch(webhookUrl, {
+      const response = await fetch('/api/files', {
         method: 'POST',
         body: formData,
-        mode: 'no-cors',
       });
-      console.log('Webhook sent successfully for user:', user.name, files);
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'File upload failed');
+      }
+
+      console.log('Files sent successfully for user:', user.name);
       setFiles([]);
       setUploadSuccess(true);
       setTimeout(() => setUploadSuccess(false), 5000);
 
     } catch (error) {
-      console.error('Error sending webhook:', error);
-      setUploadError("No s'han pogut enviar els arxius. Comprova la teva connexió de xarxa i torna-ho a provar.");
+      console.error('Error sending files:', error);
+      setUploadError(`No s\'han pogut enviar els arxius. ${(error as Error).message}`);
     } finally {
       setIsSending(false);
     }
@@ -163,11 +167,9 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
 
     setMessages(prev => [...prev, userMessage, botResponsePlaceholder]);
     setIsSendingChat(true);
-
-    const webhookUrl = 'https://n8n-n8n.v8iccl.easypanel.host/webhook/e77ac0e4-c622-48d9-b429-da8e55a97745';
     
     try {
-        const response = await fetch(webhookUrl, {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -185,33 +187,21 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
-        
+        let accumulatedText = '';
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-                if (line.trim() === '') continue;
-                try {
-                    const parsed = JSON.parse(line);
-                    if (parsed.type === 'item' && typeof parsed.content === 'string') {
-                         setMessages(prev => 
-                            prev.map(msg => 
-                                msg.id === botResponsePlaceholder.id
-                                    ? { ...msg, text: msg.text + parsed.content, timestamp: new Date() }
-                                    : msg
-                            )
-                        );
-                    }
-                } catch (error) {
-                    console.warn('Could not parse JSON line:', line, error);
-                }
-            }
+            accumulatedText += decoder.decode(value, { stream: true });
+            
+            setMessages(prev => 
+                prev.map(msg => 
+                    msg.id === botResponsePlaceholder.id
+                        ? { ...msg, text: accumulatedText, timestamp: new Date() }
+                        : msg
+                )
+            );
         }
         
         setMessages(prev => 
@@ -234,7 +224,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     } finally {
         setIsSendingChat(false);
     }
-  }, [user]);
+}, [user]);
 
   const hasContent = files.length > 0 || isProcessingFiles;
 
@@ -286,7 +276,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
                 {uploadSuccess && (
                     <div className="bg-green-500/20 border border-green-400/50 text-green-300 px-4 py-3 rounded-lg relative" role="alert">
                         <strong className="font-bold">Èxit!</strong>
-                        <span className="block sm:inline"> Els teus arxius s'han enviat correctament.</span>
+                        <span className="block sm:inline"> Els teus arxius s\'han enviat correctament.</span>
                     </div>
                 )}
 
@@ -343,7 +333,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
                       <p>No has seleccionat cap arxiu.</p>
-                      <p className="text-sm">Arrossega els arxius a l'àrea superior o fes clic per buscar.</p>
+                      <p className="text-sm">Arrossega els arxius a l\'àrea superior o fes clic per buscar.</p>
                     </div>
                   )}
                 </div>
