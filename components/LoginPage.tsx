@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 
 interface LoginPageProps {
@@ -62,9 +63,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-black/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10">
+      <div className="w-full max-w-md p-8 space-y-8 bg-black/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 animate-fade-in-down">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Benvingut/da</h1>
+           <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4">
+            EOSTransfer
+          </h1>
+          <h2 className="text-3xl font-bold tracking-tight">Benvingut/da</h2>
           <p className="mt-2 text-gray-400">Introdueix el teu email i PIN per accedir a la transferència d'arxius.</p>
         </div>
         

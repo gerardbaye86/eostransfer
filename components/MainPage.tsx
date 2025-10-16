@@ -276,7 +276,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
                 {uploadSuccess && (
                     <div className="bg-green-500/20 border border-green-400/50 text-green-300 px-4 py-3 rounded-lg relative" role="alert">
                         <strong className="font-bold">Èxit!</strong>
-                        <span className="block sm:inline"> Els teus arxius s\'han enviat correctament.</span>
+                        <span className="block sm:inline"> Els teus arxius s'han enviat correctament.</span>
                     </div>
                 )}
 
@@ -333,7 +333,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
                       <p>No has seleccionat cap arxiu.</p>
-                      <p className="text-sm">Arrossega els arxius a l\'àrea superior o fes clic per buscar.</p>
+                      <p className="text-sm">Arrossega els arxius a l'àrea superior o fes clic per buscar.</p>
                     </div>
                   )}
                 </div>

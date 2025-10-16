@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define the keyframes for the fade-in-down animation */
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Create a utility class to apply the animation */
+.animate-fade-in-down {
+  animation: fade-in-down 0.5s ease-out forwards;
+}
