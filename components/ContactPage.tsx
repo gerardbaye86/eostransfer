@@ -64,7 +64,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
             <div key={msg.id} className={`flex items-end gap-2 animate-fadeInSlideUp ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.sender === 'bot' && <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex-shrink-0"></div>}
               <div className={`px-4 py-2 rounded-2xl max-w-sm md:max-w-md lg:max-w-lg ${msg.sender === 'user' ? 'bg-blue-600/50 rounded-br-none' : 'bg-white/10 rounded-bl-none'}`}>
-                <p className="text-white">
+                <p className="text-white whitespace-pre-line">
                     {msg.sender === 'bot' && msg.text.includes("un moment") 
                         ? <BeatLoader color="#82aebb" size={8} /> 
                         : renderMessageText(msg.text)}
