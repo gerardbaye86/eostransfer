@@ -1,0 +1,5 @@
+{
+  "name": "EOSTransfer",
+  "description": "Una aplicació web progressiva perquè els clients puguin pujar documents de forma segura mitjançant una interfície protegida amb PIN. Els usuaris poden arrossegar i deixar anar múltiples arxius, veure'ls en una llista i enviar-los.",
+  "requestFramePermissions": []
+}
