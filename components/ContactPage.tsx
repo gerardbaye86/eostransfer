@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSend, FiMessageSquare } from 'react-icons/fi';
+import { FiSend, FiMessageSquare, FiPaperclip } from 'react-icons/fi';
 import { BeatLoader } from 'react-spinners';
 import type { ChatMessage, User } from '../types';
 
 interface ContactPageProps {
   user: User;
   messages: ChatMessage[];
-  onSendMessage: (message: string) => Promise<void>;
+  onSendMessage: (message: string, file?: File) => Promise<void>;
   isSending: boolean;
 }
 
 const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage, isSending }) => {
   const [inputValue, setInputValue] = useState('');
+  const [attachedFile, setAttachedFile] = useState<File | undefined>();
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -22,10 +24,21 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isSending) {
-      onSendMessage(inputValue.trim());
+    if ((inputValue.trim() || attachedFile) && !isSending) {
+      onSendMessage(inputValue.trim(), attachedFile);
       setInputValue('');
+      setAttachedFile(undefined);
     }
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setAttachedFile(e.target.files[0]);
+    }
+  };
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
   };
 
   const formatTimestamp = (date: Date): string => {
@@ -80,6 +93,15 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
       <div className="flex-shrink-0 p-4 border-t border-white/10">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
           <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <button type="button" onClick={handleAttachmentClick} className="p-3 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all duration-300">
+            <FiPaperclip />
+          </button>
+          <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
@@ -87,10 +109,15 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
             disabled={isSending}
             className="flex-grow px-4 py-2 bg-white/5 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200"
           />
-          <button type="submit" disabled={isSending || !inputValue.trim()} className="p-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
+          <button type="submit" disabled={isSending || (!inputValue.trim() && !attachedFile)} className="p-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
             <FiSend />
           </button>
         </form>
+         {attachedFile && (
+          <div className="text-white/50 text-sm mt-2">
+            Arxiu adjunt: {attachedFile.name}
+          </div>
+        )}
       </div>
     </div>
   );

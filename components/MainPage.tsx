@@ -148,7 +148,7 @@ const MainPage: React.FC<MainPageProps> = ({ user, onLogout }) => {
     }
   };
 
-const handleSendChatMessage = useCallback(async (messageText: string) => {
+const handleSendChatMessage = useCallback(async (messageText: string, file? : File) => {
     const timestamp = new Date();
     const userMessage: ChatMessage = {
         id: Date.now(),
@@ -169,16 +169,17 @@ const handleSendChatMessage = useCallback(async (messageText: string) => {
     setIsSendingChat(true);
 
     try {
+        const formData = new FormData();
+        formData.append('userId', user.id);
+        formData.append('userName', user.name);
+        formData.append('message', messageText.trim());
+        if (file) {
+            formData.append('file', file);
+        }
+
         const response = await fetch('/api/chat', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userId: user.id,
-                userName: user.name,
-                message: userMessage.text,
-            }),
+            body: formData,
         });
 
         if (!response.ok || !response.body) {
@@ -248,7 +249,7 @@ const handleSendChatMessage = useCallback(async (messageText: string) => {
         const errorMessage: ChatMessage = {
             id: botResponsePlaceholder.id,
             sender: 'bot',
-            text: "Hi ha hagut un error en connectar amb el servidor. Si us plau, torna a intentar-ho més tard.",
+            text: "Hi ha hagut un error en connectar amb el servidor. Si us plau, torna a intentar-ho mÌÄå©s tard.",
             timestamp: new Date(),
             isLoading: false,
         };
@@ -281,13 +282,13 @@ const handleSendChatMessage = useCallback(async (messageText: string) => {
         </h1>
         <button
           onClick={onLogout}
-          aria-label="Tanca la sessió"
+          aria-label="Tanca la sessiÌÄå¼"
           className="flex items-center justify-center p-2 sm:px-4 sm:py-2 bg-red-600/80 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span className="hidden sm:inline sm:ml-2">Tanca la sessió</span>
+          <span className="hidden sm:inline sm:ml-2">Tanca la sessiÌÄå¼</span>
         </button>
       </header>
       
@@ -307,7 +308,7 @@ const handleSendChatMessage = useCallback(async (messageText: string) => {
                 
                 {uploadSuccess && (
                     <div className="bg-green-500/20 border border-green-400/50 text-green-300 px-4 py-3 rounded-lg relative" role="alert">
-                        <strong className="font-bold">Èxit!</strong>
+                        <strong className="font-bold">Òåxìt!</strong>
                         <span className="block sm:inline"> Els teus arxius s'han enviat correctament.</span>
                     </div>
                 )}
@@ -365,7 +366,7 @@ const handleSendChatMessage = useCallback(async (messageText: string) => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                         </svg>
                       <p>No has seleccionat cap arxiu.</p>
-                      <p className="text-sm">Arrossega els arxius a l'àrea superior o fes clic per buscar.</p>
+                      <p className="text-sm">Arrossega els arxius a l'ÌÄåÊrea superior o fes clic per buscar.</p>
                     </div>
                   )}
                 </div>

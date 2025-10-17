@@ -4,6 +4,17 @@ export const config = {
   runtime: 'edge',
 };
 
+async function readAndProcessForm(req: Request) {
+    const formData = await req.formData();
+    const message = formData.get('message') as string;
+    const userId = formData.get('userId') as string;
+    const userName = formData.get('userName') as string;
+    const file = formData.get('file') as File | null;
+
+    return { userId, userName, message, file };
+}
+
+
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
@@ -12,9 +23,7 @@ export default async function handler(req: Request) {
     });
   }
 
-  const { userId, userName, message } = await req.json();
   const webhookUrl = process.env.CHAT_WEBHOOK_URL;
-
   if (!webhookUrl) {
     return new Response(JSON.stringify({ error: 'Chat webhook URL is not configured' }), {
         status: 500,
@@ -23,10 +32,19 @@ export default async function handler(req: Request) {
   }
 
   try {
+    const { userId, userName, message, file } = await readAndProcessForm(req);
+
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('userName', userName);
+    formData.append('message', message);
+    if (file) {
+      formData.append('file', file, file.name);
+    }
+
     const webhookResponse = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, userName, message }),
+      body: formData,
     });
 
     if (!webhookResponse.body) {
