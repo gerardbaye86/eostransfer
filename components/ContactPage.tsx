@@ -91,7 +91,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
 
       {/* Message Input Footer */}
       <div className="flex-shrink-0 p-4 border-t border-white/10">
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -107,7 +107,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ user, messages, onSendMessage
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Escriu el teu missatge aquí..."
             disabled={isSending}
-            className="flex-grow px-4 py-2 bg-white/5 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200"
+            className="flex-grow min-w-0 px-4 py-2 bg-white/5 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-200"
           />
           <button type="submit" disabled={isSending || (!inputValue.trim() && !attachedFile)} className="p-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
             <FiSend />
